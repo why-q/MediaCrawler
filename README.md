@@ -53,7 +53,7 @@ MAX_CONCURRENCY_NUM = 1  # 并发数为 1 比较保险
 
 使用 `python parse_json.py --json_dir data/xhs/json --output_dir data/docs/xhs/xhs_links.txt` 将所有 JSON 文件里面的图片链接合并为一个 txt 文件。
 
-使用 `python download_img.py --txt_dir data/docs/xhs --output_dir data/imgs/xhs` 下载所有存在的 txt 文件中的所有图片链接。可以添加 `--max_concurrent` 来修改下载的并发数。
+使用 `python download_img.py --txt_dir data/docs/xhs --output_dir data/imgs/xhs --platform xhs` 下载所有存在的 txt 文件中的所有图片链接。可以添加 `--max_concurrent` 来修改下载的并发数。
 
 ## 微博
 

@@ -174,6 +174,9 @@ async def main():
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     if txt_dir != "":
+        if not Path(txt_dir).exists():
+            raise FileNotFoundError(f"{txt_dir} does not exist")
+
         txt_paths = [
             str(path) for path in Path(txt_dir).glob("*.txt") if path.is_file()
         ]
@@ -182,6 +185,11 @@ async def main():
         download_images = download_images_xhs
     elif platform == "pexels":
         download_images = download_images_pexels
+    elif platform == "unsplash":
+        download_images = download_images_pexels
+    elif platform == "huaban":
+        download_images = download_images_pexels
+
     else:
         print(f"Platform not supported: {platform}")
         return

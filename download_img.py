@@ -43,6 +43,56 @@ async def parse_cmd():
     return args
 
 
+async def download_image_weibo(session, url, output_dir, max_retries=3):
+    img_path = Path(output_dir) / f"{url.split('/')[-1]}.png"
+    if img_path.exists():
+        print(f"Skipping existing img: {url}")
+        return
+
+    for attempt in range(max_retries):
+        try:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    image_data = await response.read()
+                    try:
+                        image = Image.open(BytesIO(image_data))
+                        image = image.convert("RGBA")
+                        image.save(img_path, "PNG")
+                        print(f"Downloaded and converted: {url}")
+                        return
+                    except Image.UnidentifiedImageError:
+                        print(f"Failed to convert to PNG: {url}")
+                else:
+                    print(f"Wrong response status of {url}: {response.status}")
+                    return
+        except (ClientError, asyncio.TimeoutError) as e:
+            if attempt < max_retries - 1:
+                print(
+                    f"Error downloading {url}: {e}. Retrying... (Attempt {attempt + 1})"
+                )
+                await asyncio.sleep(5)
+            else:
+                print(f"Failed to download {url} after {max_retries} attempts: {e}")
+                return
+
+
+async def download_images_weibo(txt_file, output_dir, max_concurrent=10, max_retries=3):
+    async with aiohttp.ClientSession() as session:
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def bounded_download(url):
+            async with semaphore:
+                await download_image_weibo(session, url, output_dir, max_retries)
+
+        with open(txt_file, "r") as file:
+            image_urls = file.readlines()
+
+        tasks = [
+            asyncio.create_task(bounded_download(url.strip())) for url in image_urls
+        ]
+        await asyncio.gather(*tasks)
+
+
 async def download_image_xhs(session, url, output_dir, max_retries=3):
     img_path = Path(output_dir) / f"{url.split('/')[-1]}.png"
     if img_path.exists():
@@ -189,7 +239,8 @@ async def main():
         download_images = download_images_pexels
     elif platform == "huaban":
         download_images = download_images_pexels
-
+    elif platform == "weibo":
+        download_images = download_images_weibo
     else:
         print(f"Platform not supported: {platform}")
         return

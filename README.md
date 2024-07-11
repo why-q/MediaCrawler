@@ -57,6 +57,8 @@ MAX_CONCURRENCY_NUM = 1  # 并发数为 1 比较保险
 
 ## 微博
 
+### --- 该方法不稳定，请优先下文中介绍的另一个代码库进行爬取 ---
+
 微博可以用同样的方式设置 Cookie 登录，无法像小红书一样得到 JSON 之后再对图片进行下载，图片如果多次重复下载可能会封 IP 但似乎只针对单张图片。
 
 推荐配置如下（其他配置保持不变），微博的搜索结果比较多，可以修改起始页继续爬取图片：
@@ -72,3 +74,11 @@ START_PAGE = 1  # 填入起始页
 CRAWLER_MAX_NOTES_COUNT = 1000  # 最大条目数，设置为 1000 目前没遇到什么问题
 MAX_CONCURRENCY_NUM = 1  # 并发数为 1 比较保险
 ```
+
+### --- Update 2024-07-10 ---
+
+另外一个爬取微博的库 [WeiboSpider](https://github.com/nghuyong/WeiboSpider?tab=readme-ov-file) 使用了更简洁的代码并且支持得到 JSON 之后再对图片进行下载。同样使用 Scrapy 框架，所以可以在 [ApiCrawler](https://github.com/why-q/ApiCrawler) 的环境下操作即可。**请确保依照官方 README 文档进行了相关配置。**
+
+爬取后使用 `python parse_json.py --platform weibo --json_dir dir/to/json --trans_dir dir/to/save/trans_json --output_path path/to/output` 可以将所有的 JSONL 文件转换成 JSON 文件并且将其中所有的图片链接合并为一个 txt 文件。
+
+之后使用上文介绍的 `python download_img.py` 命令下载图片即可。
